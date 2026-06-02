@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Особое приглашение ✨</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap');
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            overflow: hidden;
+            user-select: none;
+        }
+        .step { display: none; }
+        .step.active { display: flex; }
+        
+        #runaway-btn {
+            transition: left 0.3s ease-out, top 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="main-card" class="bg-white p-8 md:p-12 rounded-3xl shadow-2xl w-full max-w-sm min-h-[350px] flex flex-col justify-center text-center relative transition-all duration-500">
+        
+        <script>
+            // Замени строчку ниже на свой скопированный URL вебхука из Дискорда
+            const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1511321318484873348/eBj2mSfmYpd_FeHWRMnddUAYFt5KdaAd8J86MC6TG_faFp6fki2mDwKdBfmU_5rtAt1C";
+
+            let finalData = {
+                "initialAnswer": "",
+                "time": "",
+                "reason": ""
+            };
+
+            function showStep(stepId) {
+                document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+                document.getElementById(stepId).classList.add('active');
+            }
+
+            // Отправка данных в Дискорд
+            async function sendToDiscord() {
+                let messageContent = "";
+                
+                if (finalData.initialAnswer === "Да") {
+                    messageContent = `💖 **Новый ответ!**\n\n**Начальный ответ:** ——— Да ———\n**Время:** ${finalData.time}`;
+                } else if (finalData.initialAnswer === "2 Да") {
+                    messageContent = `💖 **Новый ответ (после уговоров)!**\n\n**Начальный ответ:** ——— Нет ———\n**Причина:** ${finalData.reason}\n\n**——— 2 Да ———**\n**Время:** ${finalData.time}`;
+                }
+
+                try {
+                    await fetch(DISCORD_WEBHOOK_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ content: messageContent })
+                    });
+                } catch (error) {
+                    console.error("Ошибка отправки в Дискорд:", error);
+                }
+            }
+        </script>
+
+        <div id="step1" class="step active flex-col items-center gap-6">
+            <h1 class="text-xl font-semibold text-gray-800">Не хочешь ли сходить со мной на свидание?</h1>
+            <div class="flex gap-4 w-full justify-center">
+                <button onclick="finalData['initialAnswer']='Да'; showStep('step-time')" class="w-32 bg-emerald-500 text-white py-3 rounded-xl font-medium shadow-lg hover:bg-emerald-600 transition-colors">Да</button>
+                <button onclick="showStep('step-no-reason')" class="w-32 bg-red-500 text-white py-3 rounded-xl font-medium shadow-lg hover:bg-red-600 transition-colors">Нет</button>
+            </div>
+        </div>
+
+        <div id="step-no-reason" class="step flex-col items-center gap-6 w-full">
+            <h1 class="text-xl font-semibold text-gray-800">А че так? 🥺</h1>
+            <input type="text" id="reason-input" placeholder="Укажи причину..." class="w-full px-4 py-3 rounded-xl border border-gray-200 text-center focus:ring-2 focus:ring-red-400 outline-none bg-gray-50/50">
+            <button onclick="finalData['reason']=document.getElementById('reason-input').value || 'Не указана'; finalData['initialAnswer']='Нет'; showStep('step-think-twice')" class="w-full bg-red-500 text-white py-3 rounded-xl font-medium shadow-lg hover:bg-red-600 transition-colors">Подтвердить</button>
+        </div>
+
+        <div id="step-think-twice" class="step flex-col items-center gap-6 w-full">
+            <h1 class="text-xl font-semibold text-gray-800">А если подумать?</h1>
+            <div class="flex gap-4 w-full h-12 relative justify-center items-center" id="final-btn-container">
+                <button onclick="finalData['initialAnswer']='2 Да'; showStep('step-time')" class="w-32 bg-emerald-500 text-white py-3 rounded-xl font-medium shadow-lg z-10 hover:bg-emerald-600 transition-colors">Да</button>
+                <button id="runaway-btn" onmouseenter="glideInside()" onmousemove="glideInside()" onclick="glideInside()" class="w-32 bg-red-500 text-white py-3 rounded-xl font-medium shadow-lg z-20 select-none touch-none">Нет</button>
+            </div>
+        </div>
+
+        <div id="step-time" class="step flex-col items-center gap-6 w-full">
+            <h1 class="text-xl font-semibold text-gray-800">Ура! Напиши время:</h1>
+            <input type="text" id="time-input" placeholder="Например: Завтра в 18:00" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-center focus:ring-2 focus:ring-emerald-400 outline-none bg-gray-50/50">
+            <button onclick="finalData['time']=document.getElementById('time-input').value || 'Не указано'; showStep('step-thanks'); sendToDiscord();" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-medium shadow-lg hover:bg-emerald-600 transition-colors">Подтвердить</button>
+        </div>
+
+        <div id="step-thanks" class="step flex-col items-center gap-4">
+            <div class="text-5xl animate-bounce">❤️</div>
+            <h1 class="text-xl font-semibold text-gray-800 text-center">Благодарю!</h1>
+            <p class="text-xs text-gray-400">Ответ уже летит ко мне.</p>
+        </div>
+
+    </div>
+
+    <script>
+        function glideInside() {
+            const btn = document.getElementById('runaway-btn');
+            const card = document.getElementById('main-card');
+            const rect = card.getBoundingClientRect();
+            
+            if (btn.style.position !== 'fixed') {
+                btn.style.position = 'fixed';
+                btn.style.width = '128px';
+            }
+            
+            const padding = 24;
+            const minX = rect.left + padding;
+            const maxX = rect.right - btn.offsetWidth - padding;
+            const minY = rect.top + padding;
+            const maxY = rect.bottom - btn.offsetHeight - padding;
+
+            let newLeft = Math.random() * (maxX - minX) + minX;
+            let newTop = Math.random() * (maxY - minY) + minY;
+
+            btn.style.left = newLeft + 'px';
+            btn.style.top = newTop + 'px';
+        }
+    </script>
+</body>
+</html>
